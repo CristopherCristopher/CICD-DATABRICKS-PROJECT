@@ -30,10 +30,39 @@ jobs:
           "5.- Grants"
         )
         mkdir -p notebooks_to_deploy
+        > notebooks_to_deploy/manifest.txt
 
         for nb in "${NOTEBOOKS[@]}"; do
 
           echo "Exportando: $nb"
+
+          status_response=$(curl -sS --fail-with-body --get \
+            -H "Authorization: Bearer $ORIGIN_TOKEN" \
+            --data-urlencode "path=$NOTEBOOK_BASE/$nb" \
+            "$ORIGIN_HOST/api/2.0/workspace/get-status")
+
+          language=$(echo "$status_response" | jq -r '.language')
+
+          case "$language" in
+            PYTHON)
+              extension="py"
+              ;;
+            SQL)
+              extension="sql"
+              ;;
+            SCALA)
+              extension="scala"
+              ;;
+            R)
+              extension="r"
+              ;;
+            *)
+              echo "Lenguaje no soportado para $nb: $language"
+              exit 1
+              ;;
+          esac
+
+          echo "Lenguaje detectado: $language"
 
           curl -sS --fail-with-body --get \
             -H "Authorization: Bearer $ORIGIN_TOKEN" \
@@ -41,7 +70,9 @@ jobs:
             --data-urlencode "format=SOURCE" \
             --data-urlencode "direct_download=true" \
             "$ORIGIN_HOST/api/2.0/workspace/export" \
-            --output "notebooks_to_deploy/$nb.py"
+            --output "notebooks_to_deploy/$nb.$extension"
+
+          echo "$nb|$language|$extension" >> notebooks_to_deploy/manifest.txt
 
         done
     
@@ -50,8 +81,8 @@ jobs:
         DEST_HOST=${{ secrets.DATABRICKS_DEST_HOST }}
         DEST_TOKEN=${{ secrets.DATABRICKS_DEST_TOKEN }}
         DEST_BASE="/databricksProject"
-        for file in notebooks_to_deploy/*.py; do
-          name=$(basename "$file" .py)
+        while IFS='|' read -r name language extension; do
+          file="notebooks_to_deploy/$name.$extension"
           dest_path="$DEST_BASE/$name"
           echo "Creando carpeta $DEST_BASE si no existe..."
           curl -s -X POST \
@@ -59,18 +90,18 @@ jobs:
             -H "Content-Type: application/json" \
             -d "{\"path\":\"$DEST_BASE\"}" \
             "$DEST_HOST/api/2.0/workspace/mkdirs"
-          echo "Importando $file → $dest_path"
+          echo "Importando $file → $dest_path (lenguaje: $language)"
           response=$(curl -s -X POST \
             -H "Authorization: Bearer $DEST_TOKEN" \
             -H "Content-Type: multipart/form-data" \
             -F "path=$dest_path" \
             -F "format=SOURCE" \
-            -F "language=PYTHON" \
+            -F "language=$language" \
             -F "overwrite=true" \
             -F "content=@$file" \
             "$DEST_HOST/api/2.0/workspace/import")
           echo "Response: $response"
-        done
+        done < notebooks_to_deploy/manifest.txt
     
     - name: Check if workflow exists and delete if necessary
       run: |
