@@ -1,0 +1,11 @@
+Academy Accreditation - Databricks Fundamentals credential:
+https://credentials.databricks.com/4622f143-0214-473a-9c48-1ec85aa3df11#acc.8YeHEUq2
+
+Academy Accreditation - Platform Administrator credential:
+https://credentials.databricks.com/9c142f4c-8fb1-4888-9844-ae7eb7ea98b8#acc.0haFHW7f
+
+Knowledge Badge - Get Started with Databricks Platform Administration:
+https://credentials.databricks.com/5c20eb48-f79a-4f16-bd34-6e7a8f594dbd#acc.IoWpKBjQ
+
+Academy Accreditation - Generative AI Fundamentals credential:
+https://credentials.databricks.com/158520a2-93c3-4b1c-b7e6-c7fc159e165e#acc.xpbz3HGO
