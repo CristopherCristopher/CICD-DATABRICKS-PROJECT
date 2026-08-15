@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v6
     
     - name: Install jq & curl
       run: sudo apt-get update && sudo apt-get install -y jq curl
@@ -18,14 +18,31 @@ jobs:
         ORIGIN_HOST=${{ secrets.DATABRICKS_ORIGIN_HOST }}
         ORIGIN_TOKEN=${{ secrets.DATABRICKS_ORIGIN_TOKEN }}
         NOTEBOOK_BASE="/Workspace/Users/cristopherchachalo.databricks@gmail.com/CICD-DATABRICKS-PROJECT/proceso"
-        NOTEBOOKS=("1.- Preparacion_Ambiente" "2.- Ingest citibike_trips" "2.- Ingest taxi_trips" "2.- Ingest taxi_zones_csv" "2.- Ingest taxi_zones_geojson" "2.- Ingest weather_hourly" "3.- Transform" "4.- Load" "5.- Grants")  # Agrega más según necesitesas
+        NOTEBOOKS=(
+          "1.- Preparacion_Ambiente"
+          "2.- Ingest citibike_trips"
+          "2.- Ingest taxi_trips"
+          "2.- Ingest taxi_zones_csv"
+          "2.- Ingest taxi_zones_geojson"
+          "2.- Ingest weather_hourly"
+          "3.- Transform"
+          "4.- Load"
+          "5.- Grants"
+        )
         mkdir -p notebooks_to_deploy
+
         for nb in "${NOTEBOOKS[@]}"; do
-          echo "Exportando $nb en modo raw..."
-          curl -s -X GET \
+
+          echo "Exportando: $nb"
+
+          curl -sS --fail-with-body --get \
             -H "Authorization: Bearer $ORIGIN_TOKEN" \
-            "$ORIGIN_HOST/api/2.0/workspace/export?path=$NOTEBOOK_BASE/$nb&format=SOURCE&direct_download=true" \
+            --data-urlencode "path=$NOTEBOOK_BASE/$nb" \
+            --data-urlencode "format=SOURCE" \
+            --data-urlencode "direct_download=true" \
+            "$ORIGIN_HOST/api/2.0/workspace/export" \
             --output "notebooks_to_deploy/$nb.py"
+
         done
     
     - name: Deploy notebooks to Destination Workspace
@@ -150,7 +167,7 @@ jobs:
                   "container": "raw",
                   "catalogo": "catalog_au",
                   "esquema": "bronze",
-                  "storageName": "adlsproyecto",
+                  "storageName": "adlsproyecto"
                 }
               },
               "existing_cluster_id": "$CLUSTER_ID",
@@ -172,7 +189,7 @@ jobs:
                   "container": "raw",
                   "catalogo": "catalog_au",
                   "esquema": "bronze",
-                  "storageName": "adlsproyecto",
+                  "storageName": "adlsproyecto"
                 }
               },
               "existing_cluster_id": "$CLUSTER_ID",
@@ -194,7 +211,7 @@ jobs:
                   "container": "raw",
                   "catalogo": "catalog_au",
                   "esquema": "bronze",
-                  "storageName": "adlsproyecto",
+                  "storageName": "adlsproyecto"
                 }
               },
               "existing_cluster_id": "$CLUSTER_ID",
@@ -216,7 +233,7 @@ jobs:
                   "container": "raw",
                   "catalogo": "catalog_au",
                   "esquema": "bronze",
-                  "storageName": "adlsproyecto",
+                  "storageName": "adlsproyecto"
                 }
               },
               "existing_cluster_id": "$CLUSTER_ID",
@@ -238,7 +255,7 @@ jobs:
                   "container": "raw",
                   "catalogo": "catalog_au",
                   "esquema": "bronze",
-                  "storageName": "adlsproyecto",
+                  "storageName": "adlsproyecto"
                 }
               },
               "existing_cluster_id": "$CLUSTER_ID",
@@ -259,7 +276,7 @@ jobs:
                 "base_parameters": {
                   "catalogo": "catalog_au",
                   "esquema_source": "bronze",
-                  "esquema_sink": "silver",
+                  "esquema_sink": "silver"
                 }
               },
               "existing_cluster_id": "$CLUSTER_ID",
@@ -292,7 +309,7 @@ jobs:
                 "base_parameters": {
                   "catalogo": "catalog_au",
                   "esquema_source": "silver",
-                  "esquema_sink": "golden",
+                  "esquema_sink": "golden"
                 }
               },
               "existing_cluster_id": "$CLUSTER_ID",
