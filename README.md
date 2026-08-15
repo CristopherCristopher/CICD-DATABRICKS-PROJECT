@@ -115,7 +115,11 @@ flowchart TB
     DEV --> BRANCH --> PR --> MAIN --> ACTIONS --> NB --> WF
 ```
 
-> **Pendiente para la versión final:** agregar también el diagrama PNG definitivo de arquitectura utilizado en la presentación.
+### Arquitectura visual del proyecto
+
+![Arquitectura final del proyecto](evidencias/29_arquitectura_proyecto_final.png)
+
+> El diagrama PNG complementa el diagrama Mermaid y resume fuentes, ADLS Gen2, arquitectura Medallion, Unity Catalog, Managed Identity, orquestación DEV/PROD, CI/CD, Delta Sharing, Power BI y reversión.
 
 ---
 
@@ -363,6 +367,20 @@ exlt-metastore
 </tr>
 </table>
 
+### Evidencia de tablas por capa
+
+**Bronze — 5 tablas**
+
+![Tablas Bronze](evidencias/30_bronze_tables.png)
+
+**Silver — 8 tablas**
+
+![Tablas Silver](evidencias/31_silver_tables.png)
+
+**Golden — 4 tablas**
+
+![Tablas Golden](evidencias/32_golden_tables.png)
+
 ---
 
 # 🥈 Silver: calidad e integración
@@ -393,7 +411,11 @@ La capa Silver consolida las fuentes y aplica:
 | Bike válidos | 5,675,914 |
 | Missing Weather | 0 |
 
-> 📸 **Pendiente:** agregar capturas de `silver.mobility_events`, validaciones DQ y reconciliación Silver.
+### Evidencia de calidad de `mobility_events`
+
+![Validación DQ Silver mobility_events](evidencias/33_silver_mobility_events_dq.png)
+
+La validación confirma **7,134,664 eventos integrados**, **7,130,555 eventos válidos**, **4,109 eventos inválidos** y **0 registros con Weather faltante**.
 
 ---
 
@@ -404,8 +426,7 @@ La capa Silver consolida las fuentes y aplica:
 | `mobility_hourly` | 490,915 | 7,130,555 |
 | `mobility_weather` | 8,626 | 7,130,555 |
 | `mobility_zone` | 321 | 7,130,555 |
-| `transport_comparison` | 316,412 |
-| Páginas Power BI | 3 | 7,130,555 |
+| `transport_comparison` | 316,412 | 7,130,555 |
 
 `transport_comparison` reconcilia:
 
@@ -417,7 +438,15 @@ invalid_trip_balance = 0
 invalid_share_balance = 0
 ```
 
-> 📸 **Pendiente:** agregar capturas de tablas Golden y reconciliación final.
+### Evidencias Golden
+
+![Validación transport_comparison](evidencias/34_transport_comparison_validation.png)
+
+La validación de `transport_comparison` confirma **7,130,555 viajes**, desglosados en **1,454,641 Taxi** y **5,675,914 Citi Bike**, con `invalid_trip_balance = 0` e `invalid_share_balance = 0`.
+
+![Reconciliación de las cuatro tablas Golden](evidencias/35_golden_reconciliation.png)
+
+La reconciliación final confirma que `mobility_hourly`, `mobility_weather`, `mobility_zone` y `transport_comparison` representan el mismo universo de **7,130,555 viajes válidos**.
 
 ---
 
@@ -451,7 +480,11 @@ Las cinco tareas de ingesta se ejecutan en paralelo después de `1-Preparacion_A
 
 Esta dependencia evita ejecutar Silver con una fuente incompleta.
 
-> 📸 **Pendiente:** evidencia final del Job DEV ejecutado completamente en estado SUCCESS.
+### Evidencia de ejecución DEV
+
+![Job DEV ejecutado correctamente](evidencias/36_job_dev_success.png)
+
+La ejecución del Job DEV valida el DAG definido para preparación, cinco ingestas en paralelo, transformación y carga.
 
 ---
 
@@ -504,7 +537,11 @@ PAs → Platform Administrators
 | Silver | ❌ | SELECT / MODIFY | ADMIN |
 | Golden | SELECT | SELECT / MODIFY | ADMIN |
 
-> 📸 **Pendiente:** agregar resultados `SHOW GRANTS` de catálogo, schemas y External Locations.
+### Evidencia de Grants
+
+![SHOW GRANTS catálogo y Golden](evidencias/25_show_grants_catalog_golden.png)
+
+La evidencia valida el esquema de permisos aplicado a `PAs`, `DEs` y `DAs` sobre el catálogo y la capa Golden.
 
 ---
 
@@ -537,7 +574,15 @@ La conexión desde Power BI fue validada exitosamente. El navegador de Power BI 
 
 > ⚠️ No almacenar en el repositorio el bearer token, activation link ni archivo de credenciales de Delta Sharing.
 
-> 📸 **Pendiente:** agregar capturas del Share, Recipient y grants del Share.
+### Evidencias de Delta Sharing
+
+![Delta Share creado](evidencias/26_delta_share_created.png)
+
+![Tablas agregadas al Share](evidencias/27_delta_share_tables_added.png)
+
+![Contenido final del Share](evidencias/28_delta_share_content.png)
+
+Las cuatro tablas Golden se publican en `mobility_share` con **History Sharing habilitado**. Las capturas destinadas al repositorio público deben ocultar correos, tokens, activation links y cualquier credencial.
 
 ---
 
@@ -662,7 +707,13 @@ Node type           : Standard_D4plds_v6
 Unity Catalog       : habilitado
 ```
 
-> 📸 **Pendiente:** captura del DAG `WF_ADB` y ejecución completa SUCCESS en PROD.
+### Evidencias finales de PROD
+
+![DAG WF_ADB en PROD](evidencias/37_prod_workflow_dag_success.png)
+
+![Ejecución completa WF_ADB en PROD](evidencias/38_prod_workflow_run_success.png)
+
+La ejecución productiva valida la promoción DEV → PROD, la creación del workflow `WF_ADB` y la ejecución secuencial de preparación, ingestas, transformación, carga y grants.
 
 ---
 
@@ -685,7 +736,11 @@ Golden
 
 Raw permanece intacto.
 
-> 📸 **Pendiente:** agregar evidencia de `1.- Drop-Medallion`.
+### Evidencia de reversión
+
+![Notebook Drop-Medallion](evidencias/39_reversion_drop_medallion.png)
+
+El notebook `1.- Drop-Medallion` implementa la reversión controlada de la arquitectura Medallion. El proceso elimina las tablas lógicas registradas en Unity Catalog y sus rutas físicas de las capas Bronze, Silver y Golden, preservando la capa Raw, el catálogo, los schemas, las External Locations, el Storage Credential, el Access Connector, `mobility_share` y `powerbi_recipient`.
 
 ---
 
@@ -988,7 +1043,7 @@ Connection Strings con secretos
 
 ---
 
-# 📌 Estado actual
+# 📌 Estado final
 
 | Componente | Estado |
 |---|---|
@@ -999,35 +1054,43 @@ Connection Strings con secretos
 | Bronze | ✅ |
 | Silver | ✅ |
 | Golden | ✅ |
-| Job DEV creado | ✅ |
+| Job DEV | ✅ |
 | GRANTS | ✅ |
 | Delta Sharing | ✅ |
-| Power BI conectado | ✅ |
+| Power BI | ✅ |
 | Git / ramas | ✅ |
 | CI/CD GitHub Actions | ✅ |
-| Reversión | ✅ creada |
-| Workflow PROD | 🟡 ejecución final por validar |
+| Workflow PROD | ✅ |
+| Reversión | ✅ |
 | Dashboard Power BI | ✅ |
-| Evidencias restantes | ⏳ |
+| Evidencias | ✅ |
+| README | ✅ |
 
 ---
 
-# 📸 Evidencias pendientes para cerrar el README
+# 📸 Inventario final de evidencias
 
-- [ ] catálogo `catalog_au` y schemas;
-- [ ] tablas Bronze;
-- [ ] tablas Silver;
-- [ ] validación `mobility_events`;
-- [ ] tablas Golden;
-- [ ] reconciliación Golden;
-- [ ] `SHOW GRANTS`;
-- [ ] Delta Share / Recipient;
-- [ ] Job DEV SUCCESS;
-- [ ] notebooks desplegados en PROD;
-- [ ] DAG `WF_ADB`;
-- [ ] ejecución PROD SUCCESS;
-- [ ] reversión;
-- [ ] arquitectura PNG definitiva.
+Las evidencias del proyecto se almacenan en la carpeta `evidencias/` con nombres consistentes para mantener la trazabilidad del README.
+
+| Archivo | Evidencia |
+|---|---|
+| `25_show_grants_catalog_golden.png` | `SHOW GRANTS` del catálogo y Golden |
+| `26_delta_share_created.png` | Creación de `mobility_share` |
+| `27_delta_share_tables_added.png` | Tablas Golden agregadas al Share |
+| `28_delta_share_content.png` | Contenido final del Share |
+| `29_arquitectura_proyecto_final.png` | Arquitectura visual End-to-End |
+| `30_bronze_tables.png` | 5 tablas Bronze |
+| `31_silver_tables.png` | 8 tablas Silver |
+| `32_golden_tables.png` | 4 tablas Golden |
+| `33_silver_mobility_events_dq.png` | Calidad y reconciliación Silver |
+| `34_transport_comparison_validation.png` | Validación de `transport_comparison` |
+| `35_golden_reconciliation.png` | Reconciliación de las cuatro Golden |
+| `36_job_dev_success.png` | Ejecución completa del Job DEV |
+| `37_prod_workflow_dag_success.png` | DAG `WF_ADB` en PROD |
+| `38_prod_workflow_run_success.png` | Ejecución completa SUCCESS en PROD |
+| `39_reversion_drop_medallion.png` | Notebook de reversión |
+
+> **Seguridad:** antes de publicar el repositorio, las capturas deben ocultar correos innecesarios, identificadores sensibles, tokens, activation links y credenciales.
 
 ---
 
@@ -1052,6 +1115,6 @@ Connection Strings con secretos
 
 **Proyecto:** Análisis de Movilidad Multimodal de Nueva York  
 **Tecnología:** Azure Databricks + PySpark + Delta Lake + Unity Catalog + GitHub Actions + Power BI  
-**Estado:** Dashboard Power BI completado; proyecto en fase de cierre y validación final de evidencias/PROD
+**Estado:** Solución End-to-End implementada y documentada.
 
 </div>
