@@ -380,7 +380,7 @@ jobs:
             "no_alert_for_skipped_runs": false
           },
           "webhook_notifications": {},
-          "timeout_seconds": 7200,
+          "timeout_seconds": 0,
           "max_concurrent_runs": 1,
           "tags": {
             "environment": "production",
