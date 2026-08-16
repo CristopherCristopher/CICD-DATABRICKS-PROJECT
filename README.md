@@ -30,7 +30,7 @@ La solución fue desarrollada en un ambiente **Azure Databricks DEV** mediante u
 
 ---
 
-## ✨ Características principales
+## ✨ Características principales.
 
 - 🔄 **ETL automatizado**: Raw → Bronze → Silver → Golden.
 - 🏗️ **Arquitectura Medallion** con containers físicos independientes.
